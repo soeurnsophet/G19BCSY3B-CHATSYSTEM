@@ -81,7 +81,7 @@ class AuthController extends Controller
 
     function verifyEmail(Request $request)
     {
-        $user = User::firstOrFail($request->route('id'));
+        $user = User::findOrFail($request->route('id'));
 
         if ($user->hasVerifiedEmail()) {
             throw ValidationException::withMessages([
