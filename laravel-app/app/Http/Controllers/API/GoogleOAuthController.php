@@ -24,7 +24,6 @@ class GoogleOAuthController extends Controller
     function googleOAuthCallback(Request $request)
     {
         $callback_url = base64_decode($request->query('state', ''));
-        
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Exception $e) {
