@@ -10,11 +10,8 @@ Route::get('/verify/email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware('signed')
     ->name('verify.email');
 Route::post('/send/verification-email', [AuthController::class, 'sendVerificationEmail']);
-
-// route for reset password
 Route::post('/send/reset-password-email', [AuthController::class, 'sendResetPasswordEmail']);
 Route::post('/set/new-password', [AuthController::class, 'setNewPassword'])->name('set.new-password');
-
 
 Route::prefix('google')->group(function () {
     Route::get('/oauth/redirect', [GoogleOAuthController::class, 'googleOAuthRedirect']);
@@ -22,8 +19,11 @@ Route::prefix('google')->group(function () {
     Route::post('/oauth/exchange/token', [GoogleOAuthController::class, 'googleOAuthExchangeToken'])->middleware('auth:sanctum');
 });
 
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/signout', [AuthController::class, 'signout']);
     Route::get('/verify', [AuthController::class, 'verify']);
+    Route::put('/create/password', [AuthController::class, 'createPassword']);
+    Route::put('/change/password', [AuthController::class, 'changePassword']);
+    Route::put('/update/profile-image', [AuthController::class, 'updateProfileImage']);
+    Route::delete('/delete/profile-image', [AuthController::class, 'deleteProfileImage']);
 });
