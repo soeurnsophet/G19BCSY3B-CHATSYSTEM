@@ -60,6 +60,9 @@ class User extends Authenticatable
             get: function () {
                 $imageClass = ImageClassService::forUserModel();
                 $imagePath = $this->getRawOriginal('profile_image');
+                if(str_starts_with($imagePath, 'http://') || str_starts_with($imagePath, 'https://')) {
+                    return $imagePath;
+                }
                 return $imageClass->fullUrl($imagePath);
             },
         );
@@ -70,7 +73,12 @@ class User extends Authenticatable
         return Attribute::make(
             get: function () {
                 $imageClass = ImageClassService::forUserModel();
-                $thumbnailPath = $imageClass->thumbnailPath($this->getRawOriginal('profile_image'));
+                // $thumbnailPath = $imageClass->thumbnailPath($this->getRawOriginal('profile_image'));
+                $imagePath = $this->getRawOriginal('profile_image');
+                if(str_starts_with($imagePath, 'http://') || str_starts_with($imagePath, 'https://')) {
+                    return $imagePath;
+                }
+                $thumbnailPath = $imageClass->thumbnailPath($imagePath);
                 return $imageClass->fullUrl($thumbnailPath);
             },
         );
