@@ -3,9 +3,9 @@
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { LoadingModal, MessageModal, CloseModal } from "@/functions/swal";
-import { apiGoogleOAuthExchangeToken } from "@/functions/api/google-oauth";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router';
+import { apiOAuthExchangeToken } from '@/functions/api/oauth';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -15,14 +15,14 @@ onMounted(async () => {
     try {
         LoadingModal("Processing Google authentication...");
         const error = route.query.error;
-        if (error === 'google_oauth_failed') {
+        if (error === 'oauth_failed') {
             return MessageModal({ icon: "error", title: "Error", text: "Google authentication failed. Please try again." }, () => {
                 return router.replace({ name: 'auth.signin' });
             });
         }
 
         const token = route.query.token;
-        const response = await apiGoogleOAuthExchangeToken(token);
+        const response = await apiOAuthExchangeToken(token);
         userStore.setState(response.data.user);
         userStore.setSanctumToken(response.data.token);
         CloseModal();

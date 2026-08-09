@@ -8,12 +8,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Socialite;
 
-class GoogleOAuthController extends Controller
+class OAuthController extends Controller
 {
-    function googleOAuthRedirect(Request $request) {
+    function OAuthRedirect(Request $request) {
         // this call back url is the url that the user will be redirected to frontend
+        $driver = $request->query('driver');
         $callback_url = $request->query('callback_url','');
-         $redirectUrl = Socialite::driver('google')
+         $redirectUrl = Socialite::driver($driver)
             ->stateless()
             ->with(['state' => base64_encode($callback_url)])
             ->redirect()
@@ -21,20 +22,25 @@ class GoogleOAuthController extends Controller
 
         return response(['redirect_url' => $redirectUrl]);
     }
-    function googleOAuthCallback(Request $request)
+    function OAuthCallback(Request $request, $driver)
     {
         $callback_url = base64_decode($request->query('state', ''));
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $oauthUser = Socialite::driver($driver)->stateless()->user();
         } catch (\Exception $e) {
-            return redirect($callback_url . '?error=google_oauth_failed');
+            return redirect($callback_url . '?error=' . $driver . '_oauth_failed');
+        }
+        
+        // check if the user has a name, if not, use the nickname as the name (for GitHub)
+        if($driver === 'github' && !$oauthUser->getName()) {
+            $oauthUser->name = $oauthUser->getNickname();
         }
 
         $user = User::firstOrCreate(
-            ['email' => $googleUser->getEmail()],
+            ['email' => $oauthUser->getEmail()],
             [
-                'name' => $googleUser->getName(),
-                'profile_image' => $googleUser->getAvatar(),
+                'name' => $oauthUser->getName(),
+                'profile_image' => $oauthUser->getAvatar(),
             ]
         );
 
@@ -49,7 +55,7 @@ class GoogleOAuthController extends Controller
         return redirect($callback_url . '?token=' . urlencode($token));
     }
 
-    function googleOAuthExchangeToken(Request $request)
+    function OAuthExchangeToken(Request $request)
     {
         $user = $request->user();
 
